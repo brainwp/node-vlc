@@ -14,7 +14,7 @@ var http_auth = util.format('Basic %s',
 var slave_url = 'http://192.168.1.41:8080';
 var slave_username = '';
 var slave_pass = '123456';
-var slave_dir = '/home/brasa/Documentos/BRASA/IO/changing_climate/';
+var slave_dir = '/home/brasa/Documentos/BRASA/IO/';
 var slave_http_auth = util.format('Basic %s',
 		new Buffer(slave_username || '' + ':' + slave_pass || '').toString('base64')
 );
@@ -25,8 +25,11 @@ var req_url = vlc_url + '/requests/status.xml';
 if ( typeof atual == 'undefined'){
 	atual = 'init';
 }
+// variavel para verificar ir pra frente
+var next_min = 0.2;
 var list_req = vlc_url + '/requests/playlist.json';
 var has_paused = false;
+var time = false;
 
 var loop_to_check = function(){
 	// inicia um request na maquina master para verificar o status
@@ -77,6 +80,13 @@ var loop_to_check = function(){
 												if (!error && response.statusCode == 200) {
 													has_paused = false;
 													console.log('pausado?');
+													var req_url = slave_url + '/requests/status.xml?command=seek&val=' + parseInt( result.root.time[0] );
+													request({url: req_url, headers: { 'Authorization' : slave_http_auth} },
+														function (error, response, body) {
+																if (!error && response.statusCode == 200) {
+																	console.log( req_url );
+																}
+														});
 												}
 												else {
 													console.log( 'error?' );
@@ -84,6 +94,9 @@ var loop_to_check = function(){
 										}
 									);
 							}
+
+							time = parseFloat( result.root.position[0] );
+
 							// faz um request para verificar o arquivo sendo reproduzido atualmente no master
 							request( {url: list_req, headers: { 'Authorization' : http_auth} },
 								function (error, response, body) {
@@ -99,7 +112,9 @@ var loop_to_check = function(){
 								if ( typeof value.current != 'undefined' && atual != value.name  ) {
 									// limpa a variavel com o nome e extensão do arquivo
 									var file = value.uri.split( '/' );
-									var file = file[ file.length - 1 ];
+									console.log ( value.uri );
+									var file = file[ file.length - 2 ] + '/' + file[ file.length - 1 ];
+									console.log( file );
 									// faz uma requisição tocando o arquivo atual
 									var req_url = slave_url + '/requests/status.xml?command=in_play&input=' + slave_dir + file;
 													request({url: req_url, headers: { 'Authorization' : slave_http_auth} },
@@ -119,4 +134,4 @@ var loop_to_check = function(){
 	)
 }
 // faz um loop que a cada 1 segundo faz a verificação do VLC
-setInterval( function(){ loop_to_check() }, 1000 );
+setInterval( function(){ loop_to_check() }, 500 );
