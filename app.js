@@ -1,15 +1,16 @@
+// importa modulos necessarios para rodar o script
 var xml2js = require('xml2js');
 var request = require('request');
 var util = require('util');
 
-//cfg
+// configuração do servidor master
 var vlc_url = 'http://localhost:8080';
 var vlc_username = '';
 var vlc_pass = '123';
 var http_auth = util.format('Basic %s',
 		new Buffer(vlc_username || '' + ':' + vlc_pass || '').toString('base64')
 );
-//cfg slave vlc
+// configuração do servidor slave
 var slave_url = 'http://192.168.1.41:8080';
 var slave_username = '';
 var slave_pass = '123456';
@@ -18,8 +19,7 @@ var slave_http_auth = util.format('Basic %s',
 		new Buffer(slave_username || '' + ':' + slave_pass || '').toString('base64')
 );
 
-
-
+// definição de variaveis
 var parser = new xml2js.Parser();
 var req_url = vlc_url + '/requests/status.xml';
 if ( typeof atual == 'undefined'){
