@@ -4,17 +4,24 @@ var request = require('request');
 var util = require('util');
 
 // configuração do servidor master
+// URL HTTP do VLC
 var vlc_url = 'http://localhost:8080';
+// nome de usuario: esse campo no VLC é vazio
 var vlc_username = '';
+// senha do VLC HTTP
 var vlc_pass = '123';
 var http_auth = util.format('Basic %s',
 		new Buffer(vlc_username || '' + ':' + vlc_pass || '').toString('base64')
 );
 // configuração do servidor slave
-var slave_url = 'http://192.168.1.41:8080';
+// URL HTTP do VLC
+var slave_url = 'http://10.210.1.111:8080';
+// nome de usuario: esse campo no VLC é vazio
 var slave_username = '';
+// senha do VLC HTTP
 var slave_pass = '123456';
-var slave_dir = '/home/brasa/Documentos/BRASA/IO/';
+// pasta contendo os vídeos na maquina slave
+var slave_dir = '/home/sos/esfera_videos/';
 var slave_http_auth = util.format('Basic %s',
 		new Buffer(slave_username || '' + ':' + slave_pass || '').toString('base64')
 );
@@ -25,8 +32,6 @@ var req_url = vlc_url + '/requests/status.xml';
 if ( typeof atual == 'undefined'){
 	atual = 'init';
 }
-// variavel para verificar ir pra frente
-var next_min = 0.2;
 var list_req = vlc_url + '/requests/playlist.json';
 var has_paused = false;
 var time = false;
@@ -94,7 +99,7 @@ var loop_to_check = function(){
 										}
 									);
 							}
-
+							// seta o tempo para verificar depois do pause
 							time = parseFloat( result.root.position[0] );
 
 							// faz um request para verificar o arquivo sendo reproduzido atualmente no master
